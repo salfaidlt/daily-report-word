@@ -28,6 +28,7 @@ export async function run() {
     await context.sync();
 
     let tableData = [];
+    
     if (tables.items.length > 0) {
       const existingTable = tables.items[0];
       const existingData = existingTable.getRange().split(["\n"], null, true);
