@@ -15,14 +15,35 @@ Office.onReady((info) => {
 
 export async function run() {
   await Word.run(async (context) => {
-    const formData = {
-      subject: document.getElementById("subject").value,
-      comment: document.getElementById("comment").value,
-    };
+    const subject = document.getElementById("subject").value;
+    const comment = document.getElementById("comment").value;
 
-    const docBody = context.document.body;
-    docBody.insertParagraph(`Subject: ${formData.subject}`, Word.InsertLocation.end);
-    docBody.insertParagraph(`Comment: ${formData.comment}`, Word.InsertLocation.end);
+    const now = new Date();
+    const monthLabel = now.toLocaleString('default', { month: 'long', year: 'numeric' }); // Ex: "juillet 2025"
+    const dateLabel = now.toLocaleDateString(); // Ex: "01/07/2025"
+
+    const body = context.document.body;
+    body.load("paragraphs");
+    await context.sync();
+
+    const paragraphs = body.paragraphs.items.map(p => p.text.trim());
+
+    // Vérifie si le mois existe déjà
+    let monthExists = paragraphs.some(p => p.toLowerCase() === monthLabel.toLowerCase());
+    if (!monthExists) {
+      body.insertParagraph(monthLabel, Word.InsertLocation.end).font.set({ bold: true, size: 18 });
+    }
+
+    // Vérifie si le jour existe déjà
+    let dateExists = paragraphs.some(p => p === dateLabel);
+    if (!dateExists) {
+      body.insertParagraph(dateLabel, Word.InsertLocation.end).font.set({ bold: true, size: 14 });
+    }
+
+    // Ajoute les données sous le jour
+    body.insertParagraph(`Subject: ${subject}`, Word.InsertLocation.end);
+    body.insertParagraph(`Comment: ${comment}`, Word.InsertLocation.end);
+    body.insertParagraph("", Word.InsertLocation.end); // saut de ligne
 
     await context.sync();
   }).catch((error) => {
